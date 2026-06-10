@@ -8,12 +8,17 @@
   <Results Expanded="True">
     <Layer Name="Unsteady Flow with 2D Area" Type="RASResults" Filename=".\Muncie.p01.hdf" />
   </Results>
+  <MapLayers>
+    <Layer Name="LandCoverNLCD" Type="LandCoverLayer" Filename=".\Land Classification\LandCoverNLCD.hdf" />
+    <Layer Name="InfiltrationDC" Type="LandCoverLayer" Filename=".\Land Classification\InfiltrationDC.hdf" />
+    <Layer Name="ImperviousNLCD" Type="LandCoverLayer" Filename=".\Land Classification\ImperviousNLCD.hdf" />
+  </MapLayers>
   <Terrains Checked="True" Expanded="True">
     <Layer Name="TerrainWithChannel" Type="TerrainLayer" Checked="True" Filename=".\Terrain\TerrainWithChannel.hdf" />
     <Layer Name="TerrainLidarOnly" Type="TerrainLayer" Filename=".\Terrain\TerrainLidarOnly.hdf" />
   </Terrains>
   <TerrainAssociations>
-    <Association Filename=".\Muncie.g01.hdf" TerrainFilename=".\Terrain\TerrainWithChannel.hdf" />
+    <Association Filename=".\Muncie.g01.hdf" TerrainFilename=".\Terrain\TerrainWithChannel.hdf" LandCoverFilename=".\Land Classification\LandCoverNLCD.hdf" InfiltrationFilename=".\Land Classification\InfiltrationDC.hdf" PercentImperviousFilename=".\Land Classification\ImperviousNLCD.hdf" />
     <Association Filename=".\Muncie.g02.hdf" TerrainFilename=".\Terrain\TerrainLidarOnly.hdf" />
   </TerrainAssociations>
   <CurrentSettings>

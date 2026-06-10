@@ -34,7 +34,27 @@ class Plan:
     simulation_date: str = ""
     computation_interval: str = ""
     output_interval: str = ""
+    mapping_interval: str = ""
     program_version: str = ""
+    description: str = ""
+
+
+@dataclass
+class LayerAssociation:
+    """One layer associated with a geometry (terrain, Manning's n, ...)."""
+
+    layer_name: str = ""      # display name of the layer (e.g. "TerrainWithChannel")
+    filename: str = ""        # path of the layer's HDF/raster file
+
+    @property
+    def display(self) -> str:
+        """Best available label for spreadsheet output."""
+        if self.layer_name:
+            return self.layer_name
+        if self.filename:
+            stem = Path(self.filename.replace("\\", "/")).name
+            return stem[:-4] if stem.lower().endswith(".hdf") else stem
+        return ""
 
 
 @dataclass
@@ -42,7 +62,11 @@ class Geometry:
     file: RasFile
     title: str = ""
     program_version: str = ""
-    terrain_name: str = ""    # terrain associated through the .rasmap file
+    terrain: LayerAssociation = field(default_factory=LayerAssociation)
+    mannings: LayerAssociation = field(default_factory=LayerAssociation)
+    infiltration: LayerAssociation = field(default_factory=LayerAssociation)
+    impervious: LayerAssociation = field(default_factory=LayerAssociation)
+    sediment: LayerAssociation = field(default_factory=LayerAssociation)
 
 
 @dataclass
@@ -61,9 +85,12 @@ class Terrain:
 
 
 @dataclass
-class TerrainAssociation:
-    geometry: str = ""        # geometry file or layer name
-    terrain: str = ""         # terrain name
+class MapLayer:
+    """A map / land classification layer listed in the .rasmap file."""
+
+    name: str = ""
+    layer_type: str = ""      # e.g. "LandCoverLayer", "MapLayer"
+    filename: str = ""
 
 
 @dataclass
@@ -80,7 +107,7 @@ class ProjectInventory:
     geometries: List[Geometry] = field(default_factory=list)
     flows: List[FlowFile] = field(default_factory=list)
     terrains: List[Terrain] = field(default_factory=list)
-    terrain_associations: List[TerrainAssociation] = field(default_factory=list)
+    map_layers: List[MapLayer] = field(default_factory=list)
     other_files: List[RasFile] = field(default_factory=list)
 
     def all_files(self) -> List[RasFile]:

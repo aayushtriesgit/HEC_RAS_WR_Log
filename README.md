@@ -1,10 +1,24 @@
-# HEC-RAS Project Inventory
+# HEC-RAS Water Simulation Log Generator
 
-A Python tool that scans a HEC-RAS project folder, reads the project (`.prj`),
-plan (`.pXX`), geometry (`.gXX`), flow (`.uXX` / `.fXX` / `.qXX`) and RAS Mapper
-(`.rasmap`) files, and writes the project inventory — file names, extensions,
-titles, plan/geometry/flow associations, terrain info, etc. — to an Excel
-spreadsheet.
+A Python tool that scans a HEC-RAS project folder and automatically populates a
+Water Simulation Log Excel workbook with plan, geometry, flow and terrain
+information — so you don't have to fill the log sheet in by hand after every
+ODA analysis.
+
+It reads:
+
+- **`.prj`** — project title, unit system, current plan (GIS projection `.prj`
+  files are detected and skipped)
+- **`.pXX`** plan files — plan title, short ID, associated geometry / flow file
+  extensions, simulation date, computation / output / mapping intervals
+- **`.gXX`** geometry files — geometry title
+- **`.gXX.hdf`** compiled geometry files — the terrain, Manning's n (land
+  cover), infiltration, % impervious and sediment bed material layers that
+  HEC-RAS actually associated with each geometry
+- **`.uXX` / `.fXX` / `.qXX`** flow files — flow title and type
+  (unsteady / steady / quasi-unsteady)
+- **`.rasmap`** — terrain layers, land classification layers, and
+  geometry–layer associations (used as a fallback when no `.gXX.hdf` exists)
 
 ## Installation
 
@@ -16,58 +30,57 @@ pip install -r requirements.txt
 
 ## Usage
 
-```bash
-python -m hecras_inventory <path/to/hecras/project/folder> [-o output.xlsx] [-t template.xlsx]
-```
-
-Examples:
+Just run it and answer the two questions:
 
 ```bash
-# Create <folder name>_inventory.xlsx inside the project folder
-python -m hecras_inventory sample_project
-
-# Write to a specific output file
-python -m hecras_inventory sample_project -o muncie_inventory.xlsx
-
-# Populate a copy of your own spreadsheet template
-python -m hecras_inventory sample_project -t my_template.xlsx -o filled.xlsx
+python -m hecras_inventory
 ```
+
+```text
+Enter the HEC-RAS project folder path: C:\Projects\Muncie
+Enter the folder to save the Excel log file: C:\Projects\Muncie\Logs
+```
+
+Or pass the folders directly:
+
+```bash
+python -m hecras_inventory <project_folder> -s <save_folder> [-t template.xlsx]
+```
+
+The output file is named `<Project Title>_Simulation_Log.xlsx`.
 
 ## Output
 
-By default the workbook contains five sheets:
+The workbook contains three sheets. The **Notes** and **Description** columns
+are intentionally left empty for the engineer to fill in.
 
-| Sheet      | Contents                                                                                         |
-|------------|--------------------------------------------------------------------------------------------------|
-| Project    | Project title, units, current plan, description, projection, file counts                          |
-| Files      | Every project file: name, extension, file type, title, full path                                  |
-| Plans      | Each plan with its short ID, associated geometry/flow files (and their titles), simulation dates  |
-| Geometries | Each geometry with its title and the terrain associated through the `.rasmap` file                |
-| Terrains   | Terrain layers defined in the `.rasmap` file (name, HDF filename, priority)                       |
+| Sheet      | Columns                                                                                                                       |
+|------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Plans      | Plan name, plan extension, short ID, geometry extension + name, flow extension + name, simulation date, intervals, notes, description |
+| Geometries | Geometry name, extension, terrain, Manning's n (land cover), infiltration, % impervious, sediment bed material, notes, description |
+| Flow Files | Flow name, extension, flow type, program version, notes, description                                                           |
 
-## Using your own spreadsheet template
+## Using your own log template
 
-Pass `-t / --template` with an `.xlsx` file. Data rows are appended to any sheet
-named `Project`, `Files`, `Plans`, `Geometries` or `Terrains` (headers in the
-template are kept as-is); any missing sheets are created with default headers.
+Pass `-t / --template` with your own `.xlsx` log sheet. Data rows are appended
+to any sheet named `Plans`, `Geometries` or `Flow Files` (your headers are kept
+as-is); any missing sheets are created with default headers.
 
-If your template uses a different layout (different sheet names, column order,
-or a single combined sheet), adjust `build_rows()` in
-`hecras_inventory/excel_writer.py` — all parsed data is available on the
-`ProjectInventory` model in `hecras_inventory/models.py`.
+If your template uses different sheet names or column order, adjust
+`build_rows()` in `hecras_inventory/excel_writer.py` — all parsed data is
+available on the `ProjectInventory` model in `hecras_inventory/models.py`.
 
-## What gets parsed
+## How geometry–layer associations are found
 
-- **`.prj` (project file):** project title, unit system, current plan,
-  description block. GIS projection `.prj` files (WKT) are detected and skipped.
-- **`.pXX` (plan files):** plan title, short identifier, associated geometry and
-  flow file extensions, simulation date, computation/output intervals, program
-  version.
-- **`.gXX` (geometry files):** geometry title and program version.
-- **`.uXX` / `.fXX` / `.qXX` (flow files):** flow title, flow type
-  (unsteady / steady / quasi-unsteady), program version.
-- **`.rasmap` (RAS Mapper):** terrain layers, geometry–terrain associations,
-  and the spatial projection filename.
-- **`.hdf` files** are listed in the file inventory as HDF outputs.
+1. **Preferred:** read the `/Geometry` attributes inside the compiled geometry
+   HDF (`.gXX.hdf`) — `Terrain Filename/Layername`, `Land Cover
+   Filename/Layername`, `Infiltration Filename/Layername`, `Percent Impervious
+   Filename/Layername`, `Sediment Bed Material Filename/Layername`. This is
+   what HEC-RAS actually used in the last geometry preprocessing run.
+2. **Fallback:** association entries in the `.rasmap` file.
+3. Layer filenames are cross-referenced against the `.rasmap` terrain and land
+   classification catalogs to recover display names.
 
-A small synthetic example project is included in `sample_project/` for testing.
+A small synthetic example project is included in `sample_project/` for testing
+(`Muncie.g01.hdf` is a generated fixture containing only the association
+attributes).
