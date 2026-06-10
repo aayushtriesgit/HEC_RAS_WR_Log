@@ -1,0 +1,13 @@
+Plan Title=Unsteady Flow with 2D Area
+Program Version=6.30
+Short Identifier=Unsteady2D
+Simulation Date=02JAN1900,0000,05JAN1900,2400
+Geom File=g01
+Flow File=u01
+Computation Interval=10SEC
+Output Interval=1HOUR
+Instantaneous Interval=1HOUR
+Mapping Interval=1HOUR
+Run HTab=-1
+Run UNet=-1
+Run PostProcess=-1

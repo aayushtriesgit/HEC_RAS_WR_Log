@@ -1,0 +1,6 @@
+Flow Title=Jan 1900 Flood Event
+Program Version=6.30
+Use Restart= 0
+Boundary Location=White River,Muncie,15696.24,,,,,
+Interval=1HOUR
+Flow Hydrograph= 100

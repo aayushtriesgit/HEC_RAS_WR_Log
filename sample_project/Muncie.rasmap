@@ -1,0 +1,24 @@
+<RASMapper>
+  <Version>2.0.0</Version>
+  <RASProjectionFilename Filename=".\GIS\Projection.prj" />
+  <Geometries Checked="True" Expanded="True">
+    <Layer Name="Muncie 2D Geometry" Type="RASGeometry" Checked="True" Filename=".\Muncie.g01.hdf" />
+    <Layer Name="Muncie 1D Geometry" Type="RASGeometry" Filename=".\Muncie.g02.hdf" />
+  </Geometries>
+  <Results Expanded="True">
+    <Layer Name="Unsteady Flow with 2D Area" Type="RASResults" Filename=".\Muncie.p01.hdf" />
+  </Results>
+  <Terrains Checked="True" Expanded="True">
+    <Layer Name="TerrainWithChannel" Type="TerrainLayer" Checked="True" Filename=".\Terrain\TerrainWithChannel.hdf" />
+    <Layer Name="TerrainLidarOnly" Type="TerrainLayer" Filename=".\Terrain\TerrainLidarOnly.hdf" />
+  </Terrains>
+  <TerrainAssociations>
+    <Association Filename=".\Muncie.g01.hdf" TerrainFilename=".\Terrain\TerrainWithChannel.hdf" />
+    <Association Filename=".\Muncie.g02.hdf" TerrainFilename=".\Terrain\TerrainLidarOnly.hdf" />
+  </TerrainAssociations>
+  <CurrentSettings>
+    <ProjectSettings>
+      <RiverStationUnits>Feet</RiverStationUnits>
+    </ProjectSettings>
+  </CurrentSettings>
+</RASMapper>
